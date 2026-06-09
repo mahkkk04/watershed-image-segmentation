@@ -1,0 +1,50 @@
+import cv2 as cv
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+def watershed():
+    img_path = r"C:\Users\mahak\OneDrive\Desktop\Story\Watershed_Segmentation_Algorithm\images\Input Image\1.png"
+
+    print("Trying to load:", img_path)
+    img = cv.imread(img_path)
+
+    if img is None:
+        print("ERROR: Failed to load image. Check path / file name.")
+        return
+
+    img = img[900:1300, 300:900]
+    imgRGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+    img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+    plt.figure()
+    plt.subplot(231)
+    plt.imshow(img_gray, cmap='gray')
+
+    plt.subplot(232)
+    _, imgThreshold = cv.threshold(img_gray, 120, 255, cv.THRESH_BINARY_INV)
+    plt.imshow(imgThreshold, cmap='gray')
+
+    plt.subplot(233)
+    kernel = np.ones((3, 3), np.uint8)
+    imgDilate = cv.morphologyEx(imgThreshold, cv.MORPH_DILATE, kernel)
+    plt.imshow(imgDilate)
+    
+    plt.subplot(234)
+    distTrans = cv.distanceTransform(imgDilate, cv.DIST_L2, 5)
+    plt.imshow(distTrans)
+
+    plt.subplot(235)
+    _, distThresh = cv.threshold(distTrans, 15, 255, cv.THRESH_BINARY)
+    plt.imshow(distThresh)
+
+    plt.subplot(236)
+    distThresh = np.uint8(distThresh)
+    _, labels = cv.connectedComponents(distThresh)
+    plt.imshow(labels)
+
+
+    plt.show()
+
+if __name__ == "__main__":
+    watershed()
